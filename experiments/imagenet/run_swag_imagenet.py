@@ -72,9 +72,9 @@ parser.add_argument(
 parser.add_argument(
     "--epochs",
     type=int,
-    default=5,
+    default=10,
     metavar="N",
-    help="number of epochs to train (default: 5)",
+    help="number of epochs to train (default: 10)",
 )
 parser.add_argument(
     "--save_freq", type=int, default=1, metavar="N", help="save frequency (default: 1)"

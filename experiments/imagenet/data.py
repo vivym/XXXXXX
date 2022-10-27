@@ -24,7 +24,7 @@ def loaders(path, batch_size, num_workers, shuffle_train=True):
 
     transform_train = transforms.Compose(
         [
-            transforms.RandomSizedCrop(224),
+            transforms.RandomResizedCrop(224),
             transforms.RandomHorizontalFlip(),
             transforms.ToTensor(),
             normalize,
