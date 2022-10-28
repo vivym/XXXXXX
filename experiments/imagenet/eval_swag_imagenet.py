@@ -4,6 +4,7 @@ import random
 import sys
 import time
 import tabulate
+from pathlib import Path
 
 import numpy as np
 
@@ -64,6 +65,10 @@ parser.add_argument(
     metavar="N",
     help="number of samples for SWAG (default: 30)",
 )
+parser.add_argument(
+    "--saliency",
+    action="store_true",
+)
 
 parser.add_argument("--scale", type=float, default=1.0, help="SWAG scale")
 parser.add_argument("--cov_mat", action="store_true", help="save sample covariance")
@@ -116,7 +121,7 @@ print("Preparing model")
 swag_model = SWAG(
     model_class,
     no_cov_mat=not args.cov_mat,
-    loading=True,
+    # loading=True,
     max_num_models=20,
     num_classes=num_classes,
 )
@@ -156,6 +161,10 @@ np.savez(
 
 print("SWAG")
 
+save_dir = Path("results")
+if not save_dir.exists():
+    save_dir.mkdir()
+
 swag_predictions = np.zeros((len(loaders["test"].dataset), num_classes))
 
 for i in range(args.num_samples):
@@ -167,6 +176,9 @@ for i in range(args.num_samples):
     res = utils.predict(loaders["test"], swag_model, verbose=True)
     predictions = res["predictions"]
 
+    saliency_maps = utils.calc_saliency_maps(loaders["test"], swag_model)
+    torch.save(saliency_maps, save_dir + f"saliency_maps_{i:03d}.pth")
+
     accuracy = np.mean(np.argmax(predictions, axis=1) == targets)
     nll = -np.mean(np.log(predictions[np.arange(predictions.shape[0]), targets] + eps))
     print(
@@ -175,6 +187,8 @@ for i in range(args.num_samples):
     )
 
     swag_predictions += predictions
+
+    torch.save(predictions, save_dir / f"predictions_{i:03d}.pth")
 
     ens_accuracy = np.mean(np.argmax(swag_predictions, axis=1) == targets)
     ens_nll = -np.mean(

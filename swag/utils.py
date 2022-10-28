@@ -137,6 +137,28 @@ def eval(loader, model, criterion, cuda=True, regression=False, verbose=False):
     }
 
 
+def calc_saliency_maps(loader, model, subset=None):
+    from captum.attr import Saliency
+
+    model.eval()
+
+    num_batches = len(loader)
+
+    if subset is not None:
+        num_batches = int(num_batches * subset)
+        loader = itertools.islice(loader, num_batches)
+
+    attributions = []
+    for input, target in tqdm.tqdm(loader):
+        input = input.cuda(non_blocking=True)
+        target = target.cuda(non_blocking=True)
+        saliency = Saliency(model)
+        attribution = saliency.attribute(input, target=target)
+        attributions.append(attribution)
+
+    return attributions
+
+
 def predict(loader, model, verbose=False):
     predictions = list()
     targets = list()

@@ -111,7 +111,7 @@ parser.add_argument(
 parser.add_argument(
     "--swa_start",
     type=float,
-    default=161,
+    default=0,
     metavar="N",
     help="SWA start epoch number (default: 161)",
 )
