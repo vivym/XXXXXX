@@ -9,6 +9,8 @@ import tqdm
 
 import torch.nn.functional as F
 
+from .interpretability_methods import gradcam, vanilla_gradients, integrated_gradients
+
 
 def flatten(lst):
     tmp = [i.contiguous().view(-1, 1) for i in lst]
@@ -148,15 +150,18 @@ def calc_saliency_maps(loader, model, subset=None):
         num_batches = int(num_batches * subset)
         loader = itertools.islice(loader, num_batches)
 
-    attributions = []
+    saliency_method = gradcam.GradCAM(model, 10)
+
+    gradcam_list = []
     for input, target in tqdm.tqdm(loader):
         input = input.cuda(non_blocking=True)
         target = target.cuda(non_blocking=True)
-        saliency = Saliency(model)
-        attribution = saliency.attribute(input, target=target)
-        attributions.append(attribution)
+        gradcam_map = saliency_method.get_saliency(input)
+        gradcam_map = _flatten(gradcam_map.numpy())
+        gradcam_norm = normalize_0to1(gradcam_map)
+        gradcam_list = gradcam_list.append(gradcam_norm)
 
-    return attributions
+    return gradcam_list
 
 
 def predict(loader, model, verbose=False):
@@ -177,6 +182,12 @@ def predict(loader, model, verbose=False):
             batch_size = input.size(0)
             predictions.append(F.softmax(output, dim=1).cpu().numpy())
             targets.append(target.numpy())
+
+            info = {"target", "input"}
+            torch.save(info, "a.pth")
+
+            info = torch.load("a.pth")
+
             offset += batch_size
 
     return {"predictions": np.vstack(predictions), "targets": np.concatenate(targets)}
