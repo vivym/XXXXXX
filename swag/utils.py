@@ -157,8 +157,14 @@ def calc_saliency_maps(loader, model, subset=None):
         input = input.cuda(non_blocking=True)
         target = target.cuda(non_blocking=True)
         gradcam_map = saliency_method.get_saliency(input)
-        gradcam_map = _flatten(gradcam_map.numpy())
-        gradcam_norm = normalize_0to1(gradcam_map)
+        shape = gradcam_map.shape
+        gradcam_map = gradcam_map.flatten(1)
+        gradcam_min = gradcam_map.min(1)[0]
+        gradcam_max = gradcam_map.max(1)[0]
+        gradcam_norm = (gradcam_map - gradcam_min[:, None]) / (
+            gradcam_max[:, None] - gradcam_min[:, None] + 1e-8
+        )
+        gradcam_norm = gradcam_norm.reshape(*shape)
         gradcam_list = gradcam_list.append(gradcam_norm)
 
     return gradcam_list
