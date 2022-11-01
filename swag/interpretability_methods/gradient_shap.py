@@ -6,7 +6,7 @@ Original paper: https://arxiv.org/pdf/1705.07874.pdf
 import captum
 import torch
 
-from interpretability_methods.interpretability_method import InterpretabilityMethod
+from .interpretability_method import InterpretabilityMethod
 
 
 class GradientSHAP(InterpretabilityMethod):

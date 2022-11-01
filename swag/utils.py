@@ -140,8 +140,6 @@ def eval(loader, model, criterion, cuda=True, regression=False, verbose=False):
 
 
 def calc_saliency_maps(loader, model, subset=None):
-    from captum.attr import Saliency
-
     model.eval()
 
     num_batches = len(loader)
@@ -150,22 +148,23 @@ def calc_saliency_maps(loader, model, subset=None):
         num_batches = int(num_batches * subset)
         loader = itertools.islice(loader, num_batches)
 
-    saliency_method = gradcam.GradCAM(model, 10)
+    print(model)
+    saliency_method = gradcam.GradCAM(model, model.base.layer4)
 
     gradcam_list = []
     for input, target in tqdm.tqdm(loader):
         input = input.cuda(non_blocking=True)
         target = target.cuda(non_blocking=True)
-        gradcam_map = saliency_method.get_saliency(input)
+        _, gradcam_map = saliency_method.get_saliency(input)
         shape = gradcam_map.shape
-        gradcam_map = gradcam_map.flatten(1)
-        gradcam_min = gradcam_map.min(1)[0]
-        gradcam_max = gradcam_map.max(1)[0]
+        gradcam_map = gradcam_map.reshape((shape[0], -1))
+        gradcam_min = gradcam_map.min(1)
+        gradcam_max = gradcam_map.max(1)
         gradcam_norm = (gradcam_map - gradcam_min[:, None]) / (
             gradcam_max[:, None] - gradcam_min[:, None] + 1e-8
         )
-        gradcam_norm = gradcam_norm.reshape(*shape)
-        gradcam_list = gradcam_list.append(gradcam_norm)
+        gradcam_norm = gradcam_norm.reshape(shape)
+        gradcam_list.append(gradcam_norm)
 
     return gradcam_list
 

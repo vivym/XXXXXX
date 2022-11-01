@@ -6,7 +6,7 @@ Original paper: https://arxiv.org/pdf/1610.02391.pdf
 import captum
 from captum.attr._utils.input_layer_wrapper import ModelInputWrapper
 
-from interpretability_methods.interpretability_method import InterpretabilityMethod
+from .interpretability_method import InterpretabilityMethod
 
 
 class GradCAM(InterpretabilityMethod):

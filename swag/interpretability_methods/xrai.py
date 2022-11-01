@@ -8,8 +8,8 @@ import saliency.core as saliency
 import torch
 import numpy as np
 
-from interpretability_methods.interpretability_method import InterpretabilityMethod
-from interpretability_methods.vanilla_gradients import VanillaGradients
+from .interpretability_method import InterpretabilityMethod
+from .vanilla_gradients import VanillaGradients
 
 
 class XRAI(InterpretabilityMethod):

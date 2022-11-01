@@ -1,6 +1,7 @@
 import json
 from pathlib import Path
 
+import numpy as np
 import torch
 from torchvision.datasets import ImageFolder
 
@@ -17,15 +18,16 @@ def main():
 
     # N, num_samples, num_classes
     predictions = torch.stack(predictions_list, dim=1)
-    print(predictions.shape)
 
     saliency_maps_list = []
-    for file_path in Path("results/saliency_maps_*.pth"):
+    for file_path in Path("results").glob("saliency_maps_*.pth"):
         saliency_maps = torch.load(file_path, map_location="cpu")
+        saliency_maps = np.concatenate(saliency_maps, axis=0)
         saliency_maps_list.append(saliency_maps)
 
-    # N, num_samples, H, W
-    saliency_maps = torch.stack(saliency_maps_list, dim=1)
+    # N, num_samples, 1, H, W
+    saliency_maps = np.stack(saliency_maps_list, axis=1)
+    print(saliency_maps.shape)
 
     for i, (path, label) in enumerate(val_dataset):
         # num_samples, num_classes

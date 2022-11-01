@@ -8,7 +8,7 @@ https://arxiv.org/pdf/1312.6034.pdf
 
 import captum.attr
 
-from interpretability_methods.interpretability_method import InterpretabilityMethod
+from .interpretability_method import InterpretabilityMethod
 
 
 class VanillaGradients(InterpretabilityMethod):

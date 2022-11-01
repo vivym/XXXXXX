@@ -5,7 +5,7 @@ Original paper: https://arxiv.org/pdf/1412.6806.pdf
 
 import captum
 
-from interpretability_methods.interpretability_method import InterpretabilityMethod
+from .interpretability_method import InterpretabilityMethod
 
 
 class GuidedBackprop(InterpretabilityMethod):

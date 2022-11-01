@@ -8,7 +8,7 @@ import torch
 import torch.nn.functional as F
 from lime import lime_image
 
-from interpretability_methods.interpretability_method import InterpretabilityMethod
+from .interpretability_method import InterpretabilityMethod
 
 
 class LIME(InterpretabilityMethod):
