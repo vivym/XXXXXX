@@ -19,21 +19,29 @@ def main():
     # N, num_samples, num_classes
     predictions = torch.stack(predictions_list, dim=1)
 
-    saliency_maps_list = []
-    for file_path in Path("results").glob("saliency_maps_*.pth"):
-        saliency_maps = torch.load(file_path, map_location="cpu")
-        saliency_maps = np.concatenate(saliency_maps, axis=0)
-        saliency_maps_list.append(saliency_maps)
+    # saliency_maps_list = []
+    # for file_path in Path("results").glob("saliency_maps_*.pth"):
+    #     saliency_maps = torch.load(file_path, map_location="cpu")
+    #     saliency_maps = np.concatenate(saliency_maps, axis=0)
+    #     saliency_maps_list.append(saliency_maps)
 
-    # N, num_samples, 1, H, W
-    saliency_maps = np.stack(saliency_maps_list, axis=1)
-    print(saliency_maps.shape)
+    # # N, num_samples, 1, H, W
+    # saliency_maps = np.stack(saliency_maps_list, axis=1)
+    # print(saliency_maps.shape)
 
     for i, (path, label) in enumerate(val_dataset):
         # num_samples, num_classes
         prediction = predictions[i]
-        # num_samples, H, W
-        saliency_map = saliency_maps[i]
+        # num_samples, 1, H, W
+        saliency_map = []
+        for j in range(30):
+            saliency_map.append(
+                torch.load(
+                    f"results/saliency_maps_{j:02d}_{i:08d}.pth",
+                    map_location="cpu",
+                ),
+            )
+        saliency_map = np.stack(saliency_map, axis=0)
 
         with open("json_results/{i:08d}.json") as f:
             json.dump({

@@ -176,8 +176,13 @@ for i in range(args.num_samples):
     res = utils.predict(loaders["test"], swag_model, verbose=True)
     predictions = res["predictions"]
 
-    saliency_maps = utils.calc_saliency_maps(loaders["test"], swag_model, subset=0.1)
-    torch.save(saliency_maps, save_dir / f"saliency_maps_{i:03d}.pth")
+    print("calc_saliency_maps")
+    utils.calc_saliency_maps(
+        loaders["test"], swag_model,
+        save_dir=save_dir,
+        prefix=f"saliency_maps_{i:02d}",
+    )
+    # torch.save(saliency_maps, save_dir / f"saliency_maps_{i:03d}.pth")
 
     accuracy = np.mean(np.argmax(predictions, axis=1) == targets)
     nll = -np.mean(np.log(predictions[np.arange(predictions.shape[0]), targets] + eps))

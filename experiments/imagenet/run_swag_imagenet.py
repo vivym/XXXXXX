@@ -148,6 +148,8 @@ parser.add_argument("--no_schedule", action="store_true", help="store schedule")
 
 args = parser.parse_args()
 
+args.pretrained = True
+
 
 args.device = None
 if torch.cuda.is_available():
@@ -257,31 +259,36 @@ for epoch in range(start_epoch, args.epochs):
         lr = args.lr_init
 
     print("EPOCH %d. TRAIN" % (epoch + 1))
-    if args.swa and (epoch + 1) > args.swa_start:
-        subset = 1.0 / args.swa_freq
-        for i in range(args.swa_freq):
-            print("PART %d/%d" % (i + 1, args.swa_freq))
-            train_res = utils.train_epoch(
-                loaders["train"],
-                model,
-                criterion,
-                optimizer,
-                subset=subset,
-                verbose=True,
-            )
+    # if args.swa and (epoch + 1) > args.swa_start:
+    #     subset = 1.0 / args.swa_freq
+    #     for i in range(args.swa_freq):
+    #         print("PART %d/%d" % (i + 1, args.swa_freq))
+    #         train_res = utils.train_epoch(
+    #             loaders["train"],
+    #             model,
+    #             criterion,
+    #             optimizer,
+    #             subset=subset,
+    #             verbose=True,
+    #         )
 
-            num_iterates += 1
-            utils.save_checkpoint(
-                args.dir, num_iterates, name="iter", state_dict=model.state_dict()
-            )
+    #         num_iterates += 1
+    #         utils.save_checkpoint(
+    #             args.dir, num_iterates, name="iter", state_dict=model.state_dict()
+    #         )
 
-            model.to(args.swa_device)
-            swag_model.collect_model(model)
-            model.to(args.device)
-    else:
-        train_res = utils.train_epoch(
-            loaders["train"], model, criterion, optimizer, verbose=True
-        )
+    #         model.to(args.swa_device)
+    #         swag_model.collect_model(model)
+    #         model.to(args.device)
+    # else:
+    #     train_res = utils.train_epoch(
+    #         loaders["train"], model, criterion, optimizer, verbose=True
+    #     )
+
+    train_res = {
+        "loss": 0,
+        "accuracy": 0,
+    }
 
     if (
         epoch == 0

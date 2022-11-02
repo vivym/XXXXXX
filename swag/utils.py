@@ -139,7 +139,13 @@ def eval(loader, model, criterion, cuda=True, regression=False, verbose=False):
     }
 
 
-def calc_saliency_maps(loader, model, subset=None):
+def calc_saliency_maps(
+    loader,
+    model,
+    save_dir=None,
+    prefix=None,
+    subset=None,
+):
     model.eval()
 
     num_batches = len(loader)
@@ -151,7 +157,8 @@ def calc_saliency_maps(loader, model, subset=None):
     print(model)
     saliency_method = gradcam.GradCAM(model, model.base.layer4)
 
-    gradcam_list = []
+    # gradcam_list = []
+    offset = 0
     for input, target in tqdm.tqdm(loader):
         input = input.cuda(non_blocking=True)
         target = target.cuda(non_blocking=True)
@@ -164,9 +171,13 @@ def calc_saliency_maps(loader, model, subset=None):
             gradcam_max[:, None] - gradcam_min[:, None] + 1e-8
         )
         gradcam_norm = gradcam_norm.reshape(shape)
-        gradcam_list.append(gradcam_norm)
 
-    return gradcam_list
+        for i, gradcam_norm_i in enumerate(gradcam_norm):
+            torch.save(
+                gradcam_norm_i,
+                save_dir / f"{prefix}_{offset + i:08d}.pth",
+            )
+        offset += gradcam_norm.shape[0]
 
 
 def predict(loader, model, verbose=False):
