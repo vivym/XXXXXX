@@ -43,7 +43,7 @@ def main():
             )
         saliency_map = np.stack(saliency_map, axis=0)
 
-        with open("json_results/{i:08d}.json") as f:
+        with open(f"json_results/{i:08d}.json") as f:
             json.dump({
                 "path": path,
                 "pred": prediction.argmax(1).tolist(),
