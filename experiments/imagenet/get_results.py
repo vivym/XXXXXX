@@ -46,6 +46,7 @@ def main():
         with open(f"json_results/{i:08d}.json") as f:
             json.dump({
                 "path": path,
+                "eval_image_path": f"eval_images/{i:08d}.jpeg",
                 "pred": prediction.argmax(1).tolist(),
                 "label": label,
                 "softmax": prediction.tolist(),
