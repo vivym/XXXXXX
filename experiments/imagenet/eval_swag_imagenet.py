@@ -135,6 +135,7 @@ swag_model.load_state_dict(checkpoint["state_dict"])
 
 print("SWA")
 swag_model.sample(0.0)
+
 print("SWA BN update")
 utils.bn_update(loaders["train"], swag_model, verbose=True, subset=0.1)
 print("SWA EVAL")
@@ -173,8 +174,26 @@ for i in range(args.num_samples):
     print("SWAG Sample %d/%d. BN update" % (i + 1, args.num_samples))
     utils.bn_update(loaders["train"], swag_model, verbose=True, subset=0.1)
     print("SWAG Sample %d/%d. EVAL" % (i + 1, args.num_samples))
+
+    act_offset = 0
+    def store_activations(module, input, output):
+        import json
+
+        global act_offset, i
+
+        activations = F.relu(output).detach().cpu().tolist()
+
+        for j, act in enumerate(activations):
+            with open(f"results/act_{i:03d}_{act_offset + j:08d}.json", "w") as f:
+                json.dump(act, f)
+        act_offset += len(activations)
+
+    hook = swag_model.base.layer4[2].conv1.register_forward_hook(store_activations)
+
     res = utils.predict(loaders["test"], swag_model, verbose=True)
     predictions = res["predictions"]
+
+    hook.remove()
 
     print("calc_saliency_maps")
     utils.calc_saliency_maps(
